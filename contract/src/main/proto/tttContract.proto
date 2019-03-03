@@ -1,0 +1,44 @@
+syntax = "proto3";
+package ttt.grpc;
+
+// Play request message with row, column and player id
+message playRequest {
+	int32 row = 1;
+	int32 col = 2;
+	int32 player = 3;
+}
+
+// Play response message with a boolean indicating whether the
+// play was sucessfull or the player should try again
+// *!* Check other types here https://developers.google.com/protocol-buffers/docs/proto
+message playResponse {
+	bool playMade = 1;
+}
+
+// Request empty message, since this is a procedure
+// to get the current board
+// Check other possible solution here https://stackoverflow.com/questions/29687243/protobuf-rpc-service-method-without-parameters
+message currentBoardRequest{}
+
+// Response with the current board 
+message currentBoardResponse {
+	repeated string board = 1;
+}
+
+// Request empty message, since this is a procedure for 
+// retrieving the id of the winner
+message winnerRequest{}
+
+// Winner response message indicating the id of the winner
+message winnerResponse {
+	int32 winner = 1;
+}
+
+// Defining TTT service API
+service TTTService{
+	rpc play(playRequest) returns (playResponse) {} 
+
+	rpc currentBoard(currentBoardRequest) returns (currentBoardResponse) {}
+
+	rpc checkWinner(winnerRequest) returns (winnerResponse) {}
+}
