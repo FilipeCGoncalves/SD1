@@ -22,7 +22,7 @@ message currentBoardRequest{}
 
 // Response with the current board 
 message currentBoardResponse {
-	repeated string board = 1;
+	string board = 1;
 }
 
 // Request empty message, since this is a procedure for 
