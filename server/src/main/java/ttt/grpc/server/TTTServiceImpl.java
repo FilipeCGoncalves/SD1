@@ -23,7 +23,9 @@ public class TTTServiceImpl extends TTTServiceGrpc.TTTServiceImplBase {
 	@Override
 	public void currentBoard(TttContract.currentBoardRequest request, StreamObserver<TttContract.currentBoardResponse> responseObserver) {
 
-		// In this case the request message is empty, so we only answer
+		// In this case the request message is empty, so we don't use it
+		
+		// Getting current board
 		String board = ttt.currentBoard();
 
 		// Creating Protobuff object with a builder
@@ -36,4 +38,48 @@ public class TTTServiceImpl extends TTTServiceGrpc.TTTServiceImplBase {
 		// Service completed
 		responseObserver.onCompleted();
 	}
+
+
+	@Override
+	public void play(TttContract.playRequest request, StreamObserver<TttContract.playResponse> responseObserver) {
+
+		// Getting row, col and player from the request message (see line 17 in TttContract)
+		int row = request.getRow();
+		int col = request.getCol();
+		int player = request.getPlayer();
+
+		// Performing play
+		boolean playMade = ttt.play(row, col, player);
+
+		// Creating Protobuff object with a builder
+		TttContract.playResponse response = TttContract.playResponse
+												.newBuilder().setPlayMade(playMade).build();
+
+		// Use responseObserver to send a single response back
+		responseObserver.onNext(response);
+
+		// Service completed
+		responseObserver.onCompleted();
+
+	}
+
+	@Override
+	public void checkWinner(TttContract.winnerRequest request, StreamObserver<TttContract.winnerResponse> responseObserver) {
+
+
+		// In this case the request message is empty, so we don't use it
+
+		int winner = ttt.checkWinner();
+
+		// Creating response message setting the field winner
+		TttContract.winnerResponse response = TttContract.winnerResponse
+														.newBuilder().setWinner(winner).build();
+
+		// Use responseObserver to send a single response back
+		responseObserver.onNext(response);
+
+		// Service completed
+		responseObserver.onCompleted();
+	}
+
 }
