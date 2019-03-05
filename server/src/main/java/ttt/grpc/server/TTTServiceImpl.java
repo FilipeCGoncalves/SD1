@@ -81,5 +81,4 @@ public class TTTServiceImpl extends TTTServiceGrpc.TTTServiceImplBase {
 		// Service completed
 		responseObserver.onCompleted();
 	}
-
 }
