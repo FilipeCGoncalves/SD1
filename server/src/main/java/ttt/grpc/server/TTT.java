@@ -1,3 +1,4 @@
+// Stubs will call these methods on the server
 package ttt.grpc.server;
 
 public class TTT {
