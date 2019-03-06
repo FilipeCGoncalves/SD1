@@ -4,10 +4,10 @@ package ttt.grpc.server;
 // mvn will look for any path that matches
 // ttt/grpc/file_name.java 
 
-// Import messages
+// Import messages from the contract package
 import ttt.grpc.TttContract;
 
-// Import services
+// Import services from the contract package
 import ttt.grpc.TTTServiceGrpc;
 
 // Importing StreamObserver (response)

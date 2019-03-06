@@ -21,7 +21,7 @@
 		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 
 		<!-- application properties -->
-		<mainclass>ttt.grpc.client.TTTClient</mainclass>
+		<mainclass>ttt.grpc.client.Game</mainclass>
 
 		<server.host>localhost</server.host>
 		<server.port>8080</server.port>
