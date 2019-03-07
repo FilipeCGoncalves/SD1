@@ -111,6 +111,9 @@ public class TTTClient {
 		
 		TTTClient ttt = new TTTClient(channel, stub);
 
+		ttt.playGame();
+		ttt.congratulate();
+
 		// A Channel should be shutdown before stopping the process.
 		channel.shutdownNow();
 	}
