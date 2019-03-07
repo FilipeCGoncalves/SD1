@@ -2,30 +2,27 @@ package ttt.grpc.client;
 
 import java.util.Scanner;
 
-// Channel package (connection abstraction. Transport layer, etc.)
-import io.grpc.ManagedChannel;
-
 // Import messages from the contract package
 import ttt.grpc.TttContract;
 
 // Import stub from the contract package
 import ttt.grpc.TTTServiceGrpc;
 
-public class Game {
-	/* *!* Fijarse que la clase TTT no tiene un constructor, es decir que sus variables
-	  son como globales (no deben ser accesadas de forma concurrente). En cambio esta
-	  clase tiene un constructor y cada jugador la instanciara. Ambos compartiran la 
-	  instancia de TTT pero cada uno tendra su instancia de Game */
-	
-	final ManagedChannel channel;
-	TTTServiceGrpc.TTTServiceBlockingStub stub;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+
+public class TTTClient {
+
+	final ManagedChannel c;
+	TTTServiceGrpc.TTTServiceBlockingStub s;
 	Scanner keyboardSc;
 	int winner = 0;
 	int player = 1;
 
-	public Game(ManagedChannel c, TTTServiceGrpc.TTTServiceBlockingStub s) {
-		channel = c;
-		stub = s;
+
+	public TTTClient(ManagedChannel channel, TTTServiceGrpc.TTTServiceBlockingStub stub) {
+		c = channel;
+		s = stub;
 		keyboardSc = new Scanner(System.in);
 	}
 
@@ -41,41 +38,43 @@ public class Game {
 		return play;
 	}
 
+
 	public void playGame() {
+		int play;
+
 		// Declaring request messages defined in TttContract 
 		TttContract.playRequest playReq;
-		TttContract.currentBoardRequest currentBoardReq = currentBoardRequest.newBuilder().build(); // These last two are empty messages
-		TttContract.winnerRequest winnerReq = winnerRequest.newBuilder().build();
-
-		// Declaring response messages
-		TttContract.playResponse playAccepted;
-		TttContract.currentBoardResponse cb;
-		TttContract.winnerResponse winner;
+		// To avoid creating empty messages, use winnerRequest.getDefaultInstance()
+		TttContract.currentBoardRequest currentBoardReq = TttContract.currentBoardRequest.newBuilder().build(); // These last two are empty messages
+		TttContract.winnerRequest winnerReq = TttContract.winnerRequest.newBuilder().build();
 		
+		// Variables with the actual values of the stubs
+		String currentBoard;
+		boolean playAccepted; // playAccepted == playMade (change in on the .proto) *!*
+
 		do {
 			player = ++player % 2;
 			do {
 		
-				cb = stub.currentBoard(currentBoardReq);
+				currentBoard = s.currentBoard(currentBoardReq).getBoard();
 		
-				System.out.println(cb);
+				System.out.println(currentBoard);
 				play = readPlay();
-				playReq = playRequest.newBuilder().setRow(--play / 3)
+				playReq = TttContract.playRequest.newBuilder().setRow(--play / 3)
 												  .setCol(play % 3)
 												  .setPlayer(player).build();
 				if (play != 0) {
 					/* *!* Como el tablero se identifica del 1 al 10, se debe restar 
 					 * al indice - 1 y dividirlo entre 3 */
-					playAccepted = stub.play(playReq);
+					playAccepted = s.play(playReq).getPlayMade();
 			
-					System.out.printf(playAccepted); // *!* borrar
 					if (!playAccepted)
 						System.out.println("Invalid play! Try again.");
 				} else
 					playAccepted = false;
 			} while (!playAccepted);
 
-			winner = stub.checkWinner(winnerReq);
+			winner = s.checkWinner(winnerReq).getWinner();
 		
 		} while (winner == -1);
 	}
@@ -87,8 +86,9 @@ public class Game {
 			System.out.printf("\nCongratulations, player %d, YOU ARE THE WINNER!\n", winner);
 	}
 
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) throws Exception {
+		System.out.println(TTTClient.class.getSimpleName());
+
 		// receive and print arguments
 		System.out.printf("Received %d arguments%n", args.length);
 		for (int i = 0; i < args.length; i++) {
@@ -98,7 +98,7 @@ public class Game {
 		// check arguments
 		if (args.length < 2) {
 			System.err.println("Argument(s) missing!");
-			System.err.printf("Usage: java %s host port%n", HelloClient.class.getName());
+			System.err.printf("Usage: java %s host port%n", TTTClient.class.getName());
 			return;
 		}
 
@@ -112,9 +112,11 @@ public class Game {
 
 		// Creating blocking stub. *!* read more about stub types and their relation with threads
 		TTTServiceGrpc.TTTServiceBlockingStub stub = TTTServiceGrpc.newBlockingStub(channel);
+		
+		TTTClient ttt = new TTTClient(channel, stub);
 
-		Game g = new Game(channel, stub);
-		g.playGame();
-		g.congratulate();
+		// A Channel should be shutdown before stopping the process.
+		channel.shutdownNow();
 	}
+
 }
