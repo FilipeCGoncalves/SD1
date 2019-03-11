@@ -47,7 +47,6 @@ public class TTTServiceImpl extends TTTServiceGrpc.TTTServiceImplBase {
 		int row = request.getRow();
 		int col = request.getCol();
 		int player = request.getPlayer();
-
 		// Performing play
 		boolean playMade = ttt.play(row, col, player);
 

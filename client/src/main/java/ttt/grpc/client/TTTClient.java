@@ -5,7 +5,7 @@ import java.util.Scanner;
 // Import messages from the contract package
 import ttt.grpc.TttContract;
 
-// Import stub from the contract package
+// Import stubs from the contract package
 import ttt.grpc.TTTServiceGrpc;
 
 import io.grpc.ManagedChannel;
@@ -56,10 +56,12 @@ public class TTTClient {
 		
 				System.out.println(currentBoard);
 				play = readPlay();
-				playReq = TttContract.playRequest.newBuilder().setRow(--play / 3)
-												  .setCol(play % 3)
-												  .setPlayer(player).build();
+
 				if (play != 0) {
+
+					playReq = TttContract.playRequest.newBuilder().setRow(--play / 3)
+												     .setCol(play % 3)
+												     .setPlayer(player).build();
 					/* *!* Como el tablero se identifica del 1 al 10, se debe restar 
 					 * al indice - 1 y dividirlo entre 3 */
 					playAccepted = s.play(playReq).getPlayMade();
