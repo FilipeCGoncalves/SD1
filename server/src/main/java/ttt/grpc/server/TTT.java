@@ -1,6 +1,9 @@
 // Stubs will call these methods on the server
 package ttt.grpc.server;
 
+import java.io.*; 
+import java.util.*; 
+
 public class TTT {
 	char board[][] = {
 			{ '1', '2', '3' }, /* Initial values are reference numbers */
@@ -18,24 +21,25 @@ public class TTT {
 	}
 
 	public boolean play(int row, int column, int player) {
-		/* Aqui va un semaforo. Tiene que haber hecho la jugada completa el otro
-		 para que luego se vea si la jugada que quiere hacer este es en la misma 
-		 casilla o no *!* */
-		if (!(row >= 0 && row < 3 && column >= 0 && column < 3))
-			return false;
-		if (board[row][column] > '9') // *!* If there's already an 'X' or '0' there
-			return false;
-		if (player != nextPlayer)
-			return false;
 
-		if (numPlays == 9)
-			return false;
+	
+		synchronized(this) { 
+			if (!(row >= 0 && row < 3 && column >= 0 && column < 3))
+				return false;
+			if (board[row][column] > '9') // *!* If there's already an 'X' or '0' there
+				return false;
+			if (player != nextPlayer)
+				return false;
 
-		board[row][column] = (player == 1) ? 'X'
-				: 'O'; /* Insert player symbol */
-		nextPlayer = (nextPlayer + 1) % 2;
-		numPlays++;
-		return true;
+			if (numPlays == 9)
+				return false;
+
+			board[row][column] = (player == 1) ? 'X'
+					: 'O'; /* Insert player symbol */
+			nextPlayer = (nextPlayer + 1) % 2;
+			numPlays++;
+			return true;
+		}
 	}
 
 	public int checkWinner() {
